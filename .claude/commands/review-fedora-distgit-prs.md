@@ -48,7 +48,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - Author/email correct: `Packit <hello@packit.dev>` or maintainer?
 - Version-release matches spec header: `- X.Y.Z-R`?
 - Changelog describes the actual changes accurately?
-- **Bugzilla reference included** (when expected): `Resolves: rhbz#NNNNNN`?
+- **Bugzilla reference included** (for pull_from_upstream jobs): `Resolves: rhbz#NNNNNN`?
 - Pull request reference included (if applicable): `(#NNNN)`?
 - No typos or formatting issues?
 

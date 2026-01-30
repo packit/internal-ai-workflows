@@ -19,15 +19,33 @@ pip install -r requirements.txt
 
 ### 2. Set Up Authentication
 
-Create a Fedora dist-git API token:
+The tool supports two methods for providing your Fedora dist-git API token:
 
-1. Visit https://src.fedoraproject.org/settings/token/new
-2. Create a new token with appropriate permissions
-3. Export the token as an environment variable:
+**Option 1: Use existing Packit configuration (Recommended)**
+
+If you already have a `~/.config/packit.yaml` file with a Pagure token configured, the tool will automatically use it:
+
+```yaml
+authentication:
+  pagure:
+    token: YOUR_TOKEN_HERE
+    instance_url: https://src.fedoraproject.org
+```
+
+**Option 2: Environment variable**
+
+Alternatively, you can set the token as an environment variable:
 
 ```bash
 export FEDORA_DISTGIT_TOKEN="your-token-here"
 ```
+
+**Creating a new token:**
+
+If you need to create a new Fedora dist-git API token:
+1. Visit https://src.fedoraproject.org/settings/token/new
+2. Create a new token with appropriate permissions
+3. Use either Option 1 or Option 2 above to configure it
 
 ### 3. Verify Installation
 

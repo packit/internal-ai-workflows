@@ -1,3 +1,4 @@
 # Dependencies for Packit AI workflows
 ogr
 requests
+pyyaml

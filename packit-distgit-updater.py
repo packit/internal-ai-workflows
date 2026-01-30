@@ -10,15 +10,36 @@ import ogr
 from ogr.abstract.status import CommitStatus, PRStatus
 import requests
 import warnings
+import yaml
+from pathlib import Path
 
 # filter `from pydantic.v1.datetime_parse import (  # type: ignore # pyright: ignore[reportMissingImports] # Pydantic v2`
 warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality")
 warnings.filterwarnings("ignore", module="pydantic")
 
 fedora_distgit_url = "https://src.fedoraproject.org"
+
+# Try to get token from environment variable first
 token = os.getenv("FEDORA_DISTGIT_TOKEN")
+
+# If not set, try to read from ~/.config/packit.yaml
 if not token:
-    raise ValueError("FEDORA_DISTGIT_TOKEN environment variable is not set")
+    packit_config_path = Path.home() / ".config" / "packit.yaml"
+    if packit_config_path.exists():
+        try:
+            with open(packit_config_path, "r") as f:
+                config = yaml.safe_load(f)
+                token = config.get("authentication", {}).get("pagure", {}).get("token")
+        except Exception as e:
+            print(f"Warning: Failed to read token from {packit_config_path}: {e}", file=sys.stderr)
+
+if not token:
+    raise ValueError(
+        "Fedora dist-git token not found. Please either:\n"
+        "  1. Set FEDORA_DISTGIT_TOKEN environment variable, or\n"
+        "  2. Configure token in ~/.config/packit.yaml under authentication.pagure.token"
+    )
+
 fedora_distgit_service = ogr.PagureService(token=token, instance_url=fedora_distgit_url)
 allowed_projects = ["packit", "python-ogr", "python-specfile"]
 

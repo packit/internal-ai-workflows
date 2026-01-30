@@ -30,11 +30,19 @@ Review and analyze Fedora dist-git pull requests created by Packit automation. T
 
 ### 1. **Identify an update to Review**
 
-Run the following command to see the details of 4 pull requests created by Packit and Packit Staging. The output includes title, description, file diff, and logs for all failed CI checks.
+Run the following command to see the details of 4 pull requests created by Packit and Packit Staging. The output includes title, description, CI test status, file diff, and logs for all failed CI checks.
 ```bash
 ./packit-distgit-updater.py print-pr <PACKAGE> <VERSION> <DIST_GIT_BRANCH>
 ```
 This command can take up to a minute to complete, be patient and wait at least one minute for it to complete.
+
+**CI Test Status Indicators:**
+- ✅ = Test PASSED
+- ❌ = Test FAILED or ERROR
+- ⏳ = Test PENDING
+- 🔄 = Test RUNNING
+- ⚠️ = Test WARNING
+- ❓ = Unknown status
 
 ### 2. **Review Spec File Changes**
 
@@ -94,22 +102,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - Packit created update from correct upstream repo/tag?
 - Check for security advisories for this version
 
-### 7. **Review CI Check Results**
-
-- Review failed CI job logs (if accessible)
-- Distinguish infrastructure failures from real packaging issues:
-  - **Infrastructure failures** (usually OK to ignore):
-    - Read-only filesystem errors (Koji)
-    - Network timeouts
-    - Service unavailability (Zuul, Testing Farm, Packit Service)
-    - HTML error pages instead of logs
-  - **Real issues** (must investigate):
-    - Test failures
-    - Build failures
-    - Dependency resolution errors
-    - Installation problems
-
-### 8. **Fedora Packaging Guidelines Compliance**
+### 7. **Fedora Packaging Guidelines Compliance**
 
 - No hardcoded paths that should use macros?
 - File permissions preserved unless intentionally changed?
@@ -120,7 +113,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - Paths, installation locations, and ownership correct and compliant?
 - All new files tracked and unused files removed?
 
-### 9. **Review Diff Quality**
+### 8. **Review Diff Quality**
 
 - Diff minimal and focused only on version update?
 - No unintended changes (odd context lines, spacing)?
@@ -129,7 +122,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - `.gitignore` updated with new tarball?
 - `README.packit` or similar metadata files updated appropriately?
 
-### 10. **Check All Related Pull Requests for Consistency** ⚠️ CRITICAL
+### 9. **Check All Related Pull Requests for Consistency** ⚠️ CRITICAL
 
 **4 PRs should be created:**
 - 1 from `packit` using `pull_from_upstream` workflow
@@ -147,6 +140,113 @@ This command can take up to a minute to complete, be patient and wait at least o
 - **Bugzilla resolution**: Some PRs may have `Resolves: rhbz#NNN` in changelog, others may not
 - **PR descriptions**: Different workflows may have different descriptions
 - **Generated files**: `README.packit` may show different Packit versions (minor, acceptable)
+
+### 10. **Monitor CI Tests and Review Results**
+
+**CRITICAL**: Do NOT proceed with final review recommendations (step 11) until ALL required CI tests are complete.
+
+#### Step 10.1: Identify Required CI Tests
+
+Analyze the "CI Test Status" section from the PR output in step 1. Each PR will show tests with status indicators:
+- ✅ = Test PASSED
+- ❌ = Test FAILED or ERROR
+- ⏳ = Test PENDING (not yet started)
+- 🔄 = Test RUNNING (in progress)
+- ⚠️ = Test WARNING
+
+**Common required tests for Fedora dist-git PRs:**
+- Koji build test
+- fedora-ci tests (various architectures and Fedora versions like f40, f41, rawhide)
+- Packit build tests
+- RPM build validation
+- Testing Farm tests
+
+Count all tests shown for each PR and track their completion status.
+
+#### Step 10.2: Check CI Test Completion Status
+
+Parse the "CI Test Status" section from the print-pr output for each of the 4 PRs and categorize tests:
+
+**Completed tests** (can proceed with review):
+- ✅ PASSED tests
+- ❌ FAILED/ERROR tests (completed, but failed)
+
+**Incomplete tests** (must wait):
+- ⏳ PENDING tests (not yet started)
+- 🔄 RUNNING tests (in progress)
+
+If the "CI Test Status" section shows "No tests found or not yet started", all tests are incomplete.
+
+#### Step 10.3: Wait for Tests if Incomplete
+
+**If ANY required CI tests are incomplete** (pending, running, or not yet started):
+
+1. **Inform the user** with a detailed status report:
+   ```
+   CI tests are not complete yet. Waiting for tests to finish before proceeding with final review...
+
+   Current status for PR #XXX (packit-stg/pull_from_upstream):
+   - ✅ Koji build: PASSED
+   - ⏳ fedora-ci (f40-x86_64): RUNNING
+   - ⏳ fedora-ci (f41-x86_64): PENDING
+   - ❌ fedora-ci (rawhide-x86_64): Not started
+
+   Current status for PR #YYY (packit/pull_from_upstream):
+   - ✅ Koji build: PASSED
+   - ⏳ fedora-ci (f40-x86_64): RUNNING
+   ...
+
+   Will check again in 60 seconds...
+   ```
+
+2. **Enter monitoring loop**:
+   - Wait 60 seconds
+   - Re-run `./packit-distgit-updater.py print-pr <PACKAGE> <VERSION> <DIST_GIT_BRANCH>`
+   - Parse the new output for updated test status
+   - Provide updated status to user showing:
+     - Which tests completed since last check
+     - Which tests are still pending/running
+     - Current timestamp
+   - Repeat until ALL required tests are complete (passed or failed)
+
+3. **Status update format** (every 60 seconds):
+   ```
+   [HH:MM:SS] Still waiting for CI tests...
+
+   Updates since last check:
+   - PR #XXX: fedora-ci (f40-x86_64) completed: PASSED ✅
+
+   Still waiting for:
+   - PR #XXX: fedora-ci (f41-x86_64) - RUNNING ⏳
+   - PR #XXX: fedora-ci (rawhide-x86_64) - PENDING ⏳
+   - PR #YYY: fedora-ci (rawhide-x86_64) - PENDING ⏳
+
+   Will check again in 60 seconds...
+   ```
+
+4. **Continue monitoring** until one of these conditions:
+   - All required CI tests complete (proceed to step 10.4)
+   - User explicitly interrupts and requests to proceed without waiting
+   - Tests have been pending for >30 minutes without progress (ask user if they want to continue waiting or proceed with available results)
+
+**If all required CI tests are already complete**: Proceed directly to step 10.4.
+
+#### Step 10.4: Review CI Test Results
+
+Once all tests are complete, analyze the results:
+
+- Review failed CI job logs (if accessible)
+- Distinguish infrastructure failures from real packaging issues:
+  - **Infrastructure failures** (usually OK to ignore):
+    - Read-only filesystem errors (Koji)
+    - Network timeouts
+    - Service unavailability (Zuul, Testing Farm, Packit Service)
+    - HTML error pages instead of logs
+  - **Real issues** (must investigate):
+    - Test failures
+    - Build failures
+    - Dependency resolution errors
+    - Installation problems
 
 ### 11. **Final Review Output**
 

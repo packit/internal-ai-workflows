@@ -46,15 +46,29 @@ allowed_projects = ["packit", "python-ogr", "python-specfile"]
 
 def print_pr_info(pr):
     out = f"PR {pr.id}: {pr.title}, Source branch: {pr.source_branch}\n"
-    out += f"Target branch: {pr.target_branch}\nDescription: {pr.description}\nFile diff: {pr.patch}\n"
+    out += f"Target branch: {pr.target_branch}\nDescription: {pr.description}\n"
+
+    # Print CI status summary (Pagure-specific)
     statuses = pr.get_statuses()
-    for status in statuses:
-        if status.state in [CommitStatus.error, CommitStatus.failure, CommitStatus.warning]:
-            out += f"Failed CI job: {status.name}\n"
-            # TODO: fix getting logs
-            # logs_request = requests.get(status.url)
-            # if logs_request.ok:
-            #     out += f"Failed CI job logs:\n{logs_request.text}\n"
+    if statuses:
+        out += "\nCI Test Status:\n"
+        for status in statuses:
+            state_symbol = {
+                CommitStatus.success: "✅",
+                CommitStatus.pending: "⏳",
+                CommitStatus.running: "🔄",
+                CommitStatus.failure: "❌",
+                CommitStatus.error: "❌",
+                CommitStatus.warning: "⚠️"
+            }.get(status.state, "❓")
+            out += f"  {state_symbol} {status.context}: {status.state.name.upper()}\n"
+            out += f"     {status.comment}\n"
+            if status.state in [CommitStatus.error, CommitStatus.failure, CommitStatus.warning]:
+                out += f"     URL: {status.url}\n"
+    else:
+        out += "\nCI Test Status: No tests found or not yet started\n"
+
+    out += f"\nFile diff: {pr.patch}\n"
     print(out)
 
 

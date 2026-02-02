@@ -92,3 +92,10 @@ In the Claude Code session:
 - `python-specfile`
 
 The command uses `packit-distgit-updater.py` script internally.
+
+**Possible issues**
+The workflow waits for all checks to be complete. There is an issue with Packit Fedora CI right now that a check (rpmlint, rpminspect) may be finished but still has a pending status. This prevents Claude Code from completing the workflow.
+
+A possible workaround is to inspect those checks manually yourself and tell Claude to proceed with rest of the steps:
+
+> Ignore the pending CI results, they are complete and passed but statuses were not properly synced. Proceed with rest of the steps.

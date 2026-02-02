@@ -32,7 +32,7 @@ Review and analyze Fedora dist-git pull requests created by Packit automation. T
 
 Run the following command to see the details of 4 pull requests created by Packit and Packit Staging. The output includes title, description, CI test status, file diff, and logs for all failed CI checks.
 ```bash
-./packit-distgit-updater.py print-pr <PACKAGE> <VERSION> <DIST_GIT_BRANCH>
+./packit-distgit-reviewer/scripts/packit-distgit-updater.py print-pr <PACKAGE> <VERSION> <DIST_GIT_BRANCH>
 ```
 This command can take up to a minute to complete, be patient and wait at least one minute for it to complete.
 
@@ -190,7 +190,7 @@ If the "CI Test Status" section shows "No tests found or not yet started", all t
 
 2. **Enter monitoring loop**:
    - Wait 60 seconds
-   - Re-run `./packit-distgit-updater.py print-pr <PACKAGE> <VERSION> <DIST_GIT_BRANCH>`
+   - Re-run `./packit-distgit-reviewer/scripts/packit-distgit-updater.py print-pr <PACKAGE> <VERSION> <DIST_GIT_BRANCH>`
    - Parse the new output for updated test status
    - Provide updated status to user showing:
      - Which tests completed since last check
@@ -266,9 +266,9 @@ Get confirmation from the user about your plan and then execute it.
 
 Once the user approves your plan, you should merge the select pull request using the command below:
 ```bash
-./packit-distgit-updater.py merge <PACKAGE> <PR_ID>
+./packit-distgit-reviewer/scripts/packit-distgit-updater.py merge <PACKAGE> <PR_ID>
 ```
 After the PR is merged, close the other pull requests with this command:
 ```bash
-./packit-distgit-updater.py close <PACKAGE> <PR_ID>
+./packit-distgit-reviewer/scripts/packit-distgit-updater.py close <PACKAGE> <PR_ID>
 ```

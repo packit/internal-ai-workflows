@@ -13,9 +13,15 @@ import warnings
 import yaml
 from pathlib import Path
 
-# filter `from pydantic.v1.datetime_parse import (  # type: ignore # pyright: ignore[reportMissingImports] # Pydantic v2`
-warnings.filterwarnings("ignore", message="Core Pydantic V1 functionality")
-warnings.filterwarnings("ignore", module="pydantic")
+# filter /usr/lib/.../pyforgejo/core/pydantic_utilities.py:19:
+#   UserWarning: Core Pydantic V1 functionality isn't compatible 
+#   with Python 3.14 or greater.
+warnings.filterwarnings(
+    "ignore",
+    message=".*Pydantic V1 functionality.*",
+    category=UserWarning,
+    module="pydantic"
+)
 
 fedora_distgit_url = "https://src.fedoraproject.org"
 
@@ -74,7 +80,6 @@ def print_pr_info(pr):
 def do_print_pr_info(args):
     fedora_distgit_project = fedora_distgit_service.get_project(namespace="rpms", repo=args.package)
     prs = fedora_distgit_project.get_pr_list(status=PRStatus.open)
-    # prs = [fedora_distgit_project.get_pr(x) for x in [1608, 1604, 1601, 1599]]  # packit
     found = False
     for pr in prs:
         if args.version in pr.title and args.dist_git_branch == pr.target_branch:

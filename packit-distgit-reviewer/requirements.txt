@@ -1,0 +1,4 @@
+# Dependencies for packit-distgit-reviewer plugin
+ogr
+requests
+pyyaml

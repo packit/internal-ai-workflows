@@ -75,25 +75,14 @@ This command can take up to a minute to complete, be patient and wait at least o
 - Old source entries removed (if applicable)?
 - New source files match the intended upstream release?
 
-### 4. **Check Build Dependencies**
-
-- Review `BuildRequires` changes (if any):
-  - New dependencies justified by upstream changes?
-  - Removed dependencies no longer needed?
-  - Version constraints appropriate?
-- Review `Requires` changes (if any):
-  - Runtime dependencies match new functionality?
-  - No broken dependencies?
-- `%check` or test sections adapted as needed for the new upstream?
-
-### 5. **Verify Testing Plan Updates**
+### 4. **Verify Testing Plan Updates**
 
 - `plans/main.fmf` (or similar) updated if present?
 - Git ref matches upstream commit?
 - Test URL points to correct repository?
 - Test plan path correct?
 
-### 6. **Verify Upstream References**
+### 5. **Verify Upstream References**
 
 - Upstream tag/commit reference correct?
 - Upstream tag exists at the referenced URL?
@@ -102,7 +91,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - Packit created update from correct upstream repo/tag?
 - Check for security advisories for this version
 
-### 7. **Fedora Packaging Guidelines Compliance**
+### 6. **Fedora Packaging Guidelines Compliance**
 
 - No hardcoded paths that should use macros?
 - File permissions preserved unless intentionally changed?
@@ -113,7 +102,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - Paths, installation locations, and ownership correct and compliant?
 - All new files tracked and unused files removed?
 
-### 8. **Review Diff Quality**
+### 7. **Review Diff Quality**
 
 - Diff minimal and focused only on version update?
 - No unintended changes (odd context lines, spacing)?
@@ -122,7 +111,7 @@ This command can take up to a minute to complete, be patient and wait at least o
 - `.gitignore` updated with new tarball?
 - `README.packit` or similar metadata files updated appropriately?
 
-### 9. **Check All Related Pull Requests for Consistency** ⚠️ CRITICAL
+### 8. **Check All Related Pull Requests for Consistency** ⚠️ CRITICAL
 
 **4 PRs should be created:**
 - 1 from `packit` using `pull_from_upstream` workflow
@@ -136,16 +125,16 @@ This command can take up to a minute to complete, be patient and wait at least o
 - `.gitignore` changes
 - Test plan changes
 
-**Common inconsistencies to report:**
+**Expected inconsistencies:**
 - **Bugzilla resolution**: Some PRs may have `Resolves: rhbz#NNN` in changelog, others may not
 - **PR descriptions**: Different workflows may have different descriptions
-- **Generated files**: `README.packit` may show different Packit versions (minor, acceptable)
+- **Generated files**: `README.packit` may show different Packit versions
 
-### 10. **Monitor CI Tests and Review Results**
+### 9. **Monitor CI Tests and Review Results**
 
 **CRITICAL**: Do NOT proceed with final review recommendations (step 11) until ALL required CI tests are complete.
 
-#### Step 10.1: Identify Required CI Tests
+#### Step 9.1: Identify Required CI Tests
 
 Analyze the "CI Test Status" section from the PR output in step 1. Each PR will show tests with status indicators:
 - ✅ = Test PASSED
@@ -163,7 +152,7 @@ Analyze the "CI Test Status" section from the PR output in step 1. Each PR will 
 
 Count all tests shown for each PR and track their completion status.
 
-#### Step 10.2: Check CI Test Completion Status
+#### Step 9.2: Check CI Test Completion Status
 
 Parse the "CI Test Status" section from the print-pr output for each of the 4 PRs and categorize tests:
 
@@ -177,7 +166,7 @@ Parse the "CI Test Status" section from the print-pr output for each of the 4 PR
 
 If the "CI Test Status" section shows "No tests found or not yet started", all tests are incomplete.
 
-#### Step 10.3: Wait for Tests if Incomplete
+#### Step 9.3: Wait for Tests if Incomplete
 
 **If ANY required CI tests are incomplete** (pending, running, or not yet started):
 
@@ -231,7 +220,7 @@ If the "CI Test Status" section shows "No tests found or not yet started", all t
 
 **If all required CI tests are already complete**: Proceed directly to step 10.4.
 
-#### Step 10.4: Review CI Test Results
+#### Step 9.4: Review CI Test Results
 
 Once all tests are complete, analyze the results:
 
@@ -248,7 +237,7 @@ Once all tests are complete, analyze the results:
     - Dependency resolution errors
     - Installation problems
 
-### 11. **Final Review Output**
+### 10. **Final Review Output**
 
 Provide a structured review with:
 
@@ -272,7 +261,7 @@ List any problems, inconsistencies, or concerns with severity
 #### Next Steps
 Propose a plan for which pull requests should be closed and the one that should be merged. You should select pull request created by packit-stg using the `pull_from_upstream` workflow to be merged.
 
-### 12. **Merge and close pull requests**
+### 11. **Merge and close pull requests**
 Get confirmation from the user about your plan and then execute it.
 
 Once the user approves your plan, you should merge the select pull request using the command below:

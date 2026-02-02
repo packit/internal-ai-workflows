@@ -1,0 +1,13 @@
+{
+    "name": "packit-internal-ai-workflows",
+    "owner": {
+        "name": "Packit"
+    },
+    "plugins": [
+        {
+            "name": "packit-distgit-reviewer",
+            "source": "./packit-distgit-reviewer/",
+            "description": "Review downstream Packit dist-git PRs"
+        }
+    ]
+}

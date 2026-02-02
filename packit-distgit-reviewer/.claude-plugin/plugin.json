@@ -1,0 +1,8 @@
+{
+	"name": "packit-distgit-reviewer",
+	"description": "Review and merge Fedora dist-git PRs for Packit projects",
+	"version": "0.1.0",
+	"author": {
+		"name": "Packit team"
+	}
+}

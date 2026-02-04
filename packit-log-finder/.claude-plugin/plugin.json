@@ -1,0 +1,8 @@
+{
+	"name": "packit-log-finder",
+	"description": "Find and analyze Packit service logs for debugging user-reported issues",
+	"version": "0.1.0",
+	"author": {
+		"name": "Packit team"
+	}
+}

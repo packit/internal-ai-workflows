@@ -49,7 +49,7 @@ User says: "Build failed" / "Got an error" / "Task crashed"
 **Investigation flow:**
 1. Find the task by repo/PR/identifier
 2. Get all logs for the task UUID
-3. Search for ERROR, stderr, exception patterns
+3. Search for ERROR, stderr, raise, exception patterns
 4. Identify the root cause
 
 ## Process

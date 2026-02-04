@@ -8,6 +8,11 @@
             "name": "packit-distgit-reviewer",
             "source": "./packit-distgit-reviewer/",
             "description": "Review downstream Packit dist-git PRs"
+        },
+        {
+            "name": "packit-log-finder",
+            "source": "./packit-log-finder/",
+            "description": "Find and analyze Packit service logs for debugging"
         }
     ]
 }

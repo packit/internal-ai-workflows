@@ -11,30 +11,33 @@ This repository contains Claude Code plugins that automate various Packit projec
 - [Claude Code CLI](https://claude.com/claude-code) installed and configured (Follow Red Hat documentation for details)
 - Python 3.8 or later
 
-Once you fire up your Claude Code, you can enable this local repository as a marketplace:
+## Usage
+
+> **Note:** If you plan to develop or modify plugins, follow the [Development](#development) instructions instead.
+
+Add this repository as a marketplace and install plugins:
+
 ```
-/plugin marketplace add ./
+/plugin marketplace add https://github.com/packit/internal-ai-workflows
+/plugin install packit-log-finder@packit-internal-ai-workflows
+/plugin install packit-distgit-reviewer@packit-internal-ai-workflows
 ```
 
-You can then verify in `/plugin` that the plugin is enabled and can be used:
-```
-/plugin
+Use `/plugin` to verify installed plugins.
 
- Plugins  Discover  [Installed]  Marketplaces  (←/→ or tab to cycle)
+## Development
 
- packit-distgit-reviewer @ inline
- Scope: user
- Version: 0.1.0
- Review and merge Fedora dist-git PRs for Packit projects
+If you intend to develop a plugin, install the marketplace from a local repository:
 
- Author: Packit team
- Status: Enabled
+```
+git clone https://github.com/packit/internal-ai-workflows.git
+claude
+# Run in Claude Code
+/plugin marketplace add ./internal-ai-workflows
+/plugin install <PLUGIN_NAME>@packit-internal-ai-workflows
 ```
 
-It's honestly unclear to me how exactly this works, alternatively you can tell claude to load the plugin of your choice while launching it:
-```
-$ claude --plugin-dir ./packit-distgit-reviewer
-```
+> **Note:** If you previously added the remote marketplace, remove it first with `/plugin marketplace remove packit-internal-ai-workflows`.
 
 ## Available Plugins
 
@@ -66,3 +69,15 @@ pip install -r requirements.txt
 - Guides you through merging/closing PRs
 
 **Documentation:** See [packit-distgit-reviewer/README.md](packit-distgit-reviewer/README.md) for detailed documentation.
+
+### packit-log-finder
+
+Analyze Packit service logs to debug user-reported issues by tracing Celery task UUIDs and building event timelines.
+
+**Usage:**
+
+```
+/packit-log-finder:find-packit-logs ./worker-logs.csv Status is pending for https://github.com/org/repo/pull/123
+```
+
+**Documentation:** See [packit-log-finder/README.md](packit-log-finder/README.md) for details.

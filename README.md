@@ -21,6 +21,7 @@ Add this repository as a marketplace and install plugins:
 /plugin marketplace add https://github.com/packit/internal-ai-workflows
 /plugin install packit-log-finder@packit-internal-ai-workflows
 /plugin install packit-distgit-reviewer@packit-internal-ai-workflows
+/plugin install packit-pr-review@packit-internal-ai-workflows
 ```
 
 Use `/plugin` to verify installed plugins.
@@ -69,6 +70,16 @@ pip install -r requirements.txt
 - Guides you through merging/closing PRs
 
 **Documentation:** See [packit-distgit-reviewer/README.md](packit-distgit-reviewer/README.md) for detailed documentation.
+
+### packit-pr-review
+
+Review all open pull requests across the `packit` GitHub org. Categorises PRs by review status and generates action items for triage.
+
+**Command:** `/packit-pr-review:review-open-prs`
+
+**Prerequisites:** `gh` CLI authenticated with `read:org` and `repo` scopes.
+
+**Documentation:** See [packit-pr-review/README.md](packit-pr-review/README.md) for details.
 
 ### packit-log-finder
 

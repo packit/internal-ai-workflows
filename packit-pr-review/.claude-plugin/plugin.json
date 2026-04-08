@@ -1,0 +1,8 @@
+{
+	"name": "packit-pr-review",
+	"description": "Review of open PRs across the packit GitHub org with categorisation and action items",
+	"version": "0.1.0",
+	"author": {
+		"name": "Packit team"
+	}
+}

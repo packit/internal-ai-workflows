@@ -100,7 +100,37 @@ At the end, produce a numbered checklist:
 5. Consider closing very stale PRs (>90d without updates)
 6. Bring blocked/discuss PRs to team discussion
 
-### 5. Notes
+### 5. Slack-ready summary
+
+After the full report, produce a concise copy-pasteable message for Slack (or similar).
+Use this exact format — plain text with URLs, no markdown tables:
+
+```
+Ready to merge (just click the button):
+- <url> -- <title> (<author>)
+- <url> -- <title> (<author>, needs rebase - <N>d stale)
+
+Reviews needed -- external contributors waiting on us:
+- <url> -- <title> (<author>, <stale_days>d)
+
+Reviews needed -- team:
+- <url> -- <title> (<author>, <stale_days>d)
+```
+
+Rules:
+- **Ready to merge**: all "Approved - Ready to Merge" PRs. If `stale_days` > 30, append
+  `needs rebase - <N>d stale` in parentheses. Mark external contributors with `, external`.
+- **Reviews needed -- external contributors**: all "Waiting for Review" PRs from external
+  contributors, sorted by `stale_days` ascending. Only include PRs with `stale_days` <= 90
+  (skip very stale ones — those belong in a close-or-revive discussion, not a review ask).
+  Show `stale_days` in parentheses.
+- **Reviews needed -- team**: same, but for team PRs with `stale_days` <= 90.
+- Omit sections that would be empty.
+- Do NOT include Waiting for Author, Draft, or Blocked PRs — those are tracked in the full
+  report but not actionable as a team ping.
+- Keep it concise: no header decorations, no staleness labels, just the URL/title/author/days.
+
+### 6. Notes
 
 - Do NOT merge, close, or modify any PRs. This command is read-only.
 - If `gh` commands fail due to auth, inform the user and suggest `gh auth login`.

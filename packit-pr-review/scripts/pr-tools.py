@@ -17,6 +17,20 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
+# Primary org for PR search
+PRIMARY_ORG = "packit"
+
+# Additional repositories outside the primary org to include
+EXTRA_REPOS = [
+    "fedora-copr/logdetective",
+    "fedora-copr/logdetective-website",
+    "fedora-copr/logdetective-packit",
+    "fedora-copr/logdetective-sample",
+]
+
+# All orgs to fetch team members from (union of members = team)
+TEAM_ORGS = ["packit", "fedora-copr"]
+
 
 def gh(*args, parse_json=True):
     result = subprocess.run(
@@ -151,6 +165,30 @@ def _fetch_review_single(ref):
     }
 
 
+def _fetch_prs(repo=None, owner=None):
+    """Fetch open PRs for a specific repository."""
+    assert repo or owner, "this tool is to be used for filtering"
+    query = []
+    if owner:
+        query += ["--owner", owner]
+    if repo:
+        query += ["--repo", repo]
+
+    return gh(
+        "search", "prs", "--state", "open",
+        "--json", "repository,title,url,author,createdAt,updatedAt,"
+                  "isDraft,commentsCount,labels,number",
+        "--limit", "500",
+        *query
+    )
+
+
+def _fetch_org_members(org):
+    """Fetch members of a GitHub organization."""
+    raw = gh("api", f"orgs/{org}/members", "--jq", ".[].login", parse_json=False)
+    return set(line.strip() for line in raw.splitlines() if line.strip())
+
+
 def _enrich_pr(pr, reviews, team, now):
     """Build an enriched PR entry with review data and computed fields."""
     repo_full = pr["repository"]["nameWithOwner"]
@@ -266,19 +304,26 @@ def cmd_run():
     Outputs JSON with all PRs enriched with review data.
     No filtering — the LLM decides what to skip/categorise.
     """
-    print("Fetching open PRs...", file=sys.stderr)
-    prs = gh(
-        "search", "prs", "--owner", "packit", "--state", "open",
-        "--json", "repository,title,url,author,createdAt,updatedAt,"
-                  "isDraft,commentsCount,labels,number",
-        "--limit", "500",
-    )
-    print(f"Fetched {len(prs)} PRs", file=sys.stderr)
+    print(f"Fetching open PRs from {PRIMARY_ORG}...", file=sys.stderr)
+    prs = _fetch_prs(owner=PRIMARY_ORG)
+    print(f"Fetched {len(prs)} PRs from {PRIMARY_ORG}", file=sys.stderr)
+
+    # Fetch PRs from additional repositories
+    for repo in EXTRA_REPOS:
+        print(f"Fetching open PRs from {repo}...", file=sys.stderr)
+        extra_prs = _fetch_prs(repo=repo)
+        prs.extend(extra_prs)
+        print(f"Fetched {len(extra_prs)} PRs from {repo}", file=sys.stderr)
+
+    print(f"Total: {len(prs)} PRs", file=sys.stderr)
 
     print("Fetching org members...", file=sys.stderr)
-    raw = gh("api", "orgs/packit/members", "--jq", ".[].login", parse_json=False)
-    team = set(line.strip() for line in raw.splitlines() if line.strip())
-    print(f"Found {len(team)} team members", file=sys.stderr)
+    team = set()
+    for org in TEAM_ORGS:
+        members = _fetch_org_members(org)
+        team.update(members)
+        print(f"  {org}: {len(members)} members", file=sys.stderr)
+    print(f"Total: {len(team)} team members", file=sys.stderr)
 
     refs = [
         f"{pr['repository']['nameWithOwner']}#{pr['number']}"
@@ -303,23 +348,30 @@ def cmd_run():
 
 
 def cmd_fetch_prs():
-    """Fetch all open PRs across the packit org. Outputs JSON array to stdout."""
-    prs = gh(
-        "search", "prs", "--owner", "packit", "--state", "open",
-        "--json", "repository,title,url,author,createdAt,updatedAt,"
-                  "isDraft,commentsCount,labels,number",
-        "--limit", "500",
-    )
-    print(f"Fetched {len(prs)} PRs", file=sys.stderr)
+    """Fetch all open PRs across configured orgs/repos. Outputs JSON array."""
+    prs = _fetch_prs(owner=PRIMARY_ORG)
+    print(f"Fetched {len(prs)} PRs from {PRIMARY_ORG}", file=sys.stderr)
+
+    for repo in EXTRA_REPOS:
+        extra_prs = _fetch_prs(repo=repo)
+        prs.extend(extra_prs)
+        print(f"Fetched {len(extra_prs)} PRs from {repo}", file=sys.stderr)
+
+    print(f"Total: {len(prs)} PRs", file=sys.stderr)
     json.dump(prs, sys.stdout, indent=2)
     print()
 
 
 def cmd_fetch_members():
-    """Fetch packit org members. Outputs one login per line to stdout."""
-    raw = gh("api", "orgs/packit/members", "--jq", ".[].login", parse_json=False)
-    if raw:
-        print(raw)
+    """Fetch members from all configured orgs. Outputs one login per line."""
+    all_members = set()
+    for org in TEAM_ORGS:
+        members = _fetch_org_members(org)
+        all_members.update(members)
+        print(f"# {org}: {len(members)} members", file=sys.stderr)
+    print(f"# Total unique: {len(all_members)} members", file=sys.stderr)
+    for login in sorted(all_members):
+        print(login)
 
 
 def cmd_fetch_reviews(pr_refs):
@@ -335,8 +387,8 @@ def cmd_fetch_reviews(pr_refs):
 
 COMMANDS = {
     "run": "Full pipeline: fetch, review, enrich all PRs (JSON output)",
-    "fetch-prs": "Fetch all open PRs across the packit org (JSON)",
-    "fetch-members": "Fetch packit org member logins (one per line)",
+    "fetch-prs": "Fetch all open PRs across configured orgs/repos (JSON)",
+    "fetch-members": "Fetch team member logins from all configured orgs (one per line)",
     "fetch-reviews": "Fetch review status. Args: [--from-file <file>] [OWNER/REPO#NUM ...]",
 }
 

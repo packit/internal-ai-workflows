@@ -103,18 +103,21 @@ At the end, produce a numbered checklist:
 ### 5. Slack-ready summary
 
 After the full report, produce a concise copy-pasteable message for Slack (or similar).
-Use this exact format — plain text with URLs, no markdown tables:
+Use this exact format — plain text with URLs, no tables:
 
 ```
-Ready to merge (just click the button):
-- <url> -- <title> (<author>)
-- <url> -- <title> (<author>, needs rebase - <N>d stale)
+# Ready to merge (just click the button)
 
-Reviews needed -- external contributors waiting on us:
-- <url> -- <title> (<author>, <stale_days>d)
+- [ ] [«title»](«url») — («author»)
+- [ ] [«title»](«url») — («author», needs rebase - «N»d stale)
 
-Reviews needed -- team:
-- <url> -- <title> (<author>, <stale_days>d)
+# Reviews needed — external contributors waiting on us
+
+- [ ] [«title»](«url») — («author», «stale days»d)
+
+# Reviews needed — team
+
+- [ ] [«title»](«url») — («author», «stale days»d)
 ```
 
 Rules:
@@ -129,6 +132,8 @@ Rules:
 - Do NOT include Waiting for Author, Draft, or Blocked PRs — those are tracked in the full
   report but not actionable as a team ping.
 - Keep it concise: no header decorations, no staleness labels, just the URL/title/author/days.
+
+Also save the report in a text file named `pr-review-summary.md`.
 
 ### 6. Notes
 
